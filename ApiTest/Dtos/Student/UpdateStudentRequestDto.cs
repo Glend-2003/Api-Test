@@ -1,25 +1,19 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ApiTest.Models
+namespace ApiTest.Dtos.UpdateStudentRequestDto
 {
-    public class Student
+    public class UpdateStudentRequestDto
     {
-        [Key]
-        public int id { get; set; }
         [Required]
+         [StringLength(100)]
         public string name { get; set; }
         [Required]
+         [StringLength(100)]
         public string email { get; set; }
         [Required]
+         [StringLength(100)]
         public string phone { get; set; }
-        [ForeignKey("courseId")]    
-        public int courseId { get; set; }
-
-  
     }
 }

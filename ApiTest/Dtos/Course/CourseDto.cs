@@ -11,7 +11,7 @@ namespace ApiTest.Dtos.Course
         [Required]
         [StringLength(100)]
         public string name { get; set; }
-       [Required]
+        [Required]
         [StringLength(200)]
         public string description { get; set; }
        
