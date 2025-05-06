@@ -14,7 +14,7 @@ namespace ApiTest.Models
         [Required]
         public string name { get; set; }
         [Required]
-        public string nescription { get; set; }
+        public string description { get; set; }
         [Required]
         public string? imageUrl { get; set; }
         [Required]
