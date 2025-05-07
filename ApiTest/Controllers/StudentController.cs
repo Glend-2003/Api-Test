@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApiTest.Data;
 using ApiTest.Dtos.Student;
-
 using ApiTest.Mappers;
 using ApiTest.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiTest.Controller.Student
 {
-    //test de endpoint http://localhost:5237/swagger/index.html
+
     [Route("api/student")]
     [ApiController]
     public class StudentController : ControllerBase
@@ -50,31 +49,46 @@ namespace ApiTest.Controller.Student
             var students = await _context.Students.Where(s => s.courseId == courseId).ToListAsync();
             return Ok(students.Select(n => n.ToDto()).ToList());
         }
+
         [HttpPost]
         public async Task<ActionResult<StudentDto>> CreateStudent([FromBody] CreateStudentRequestDto createDto)
         {
-            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var student = createDto.ToStudentFromCreateDto();
+            
+            var existingStudentByEmail = await _context.Students.FirstOrDefaultAsync(s => s.email == createDto.email);
+            if (existingStudentByEmail != null)
             {
-                student.name = createDto.name;
-                student.email = createDto.email;
-                student.phone = createDto.phone;
-                student.courseId = createDto.courseId;
+                return BadRequest("El estudiante con este correo electrónico ya está inscrito en un curso.");
             }
+            
+           
+            var courseExists = await _context.Courses.AnyAsync(c => c.id == createDto.courseId);
+            if (!courseExists)
+            {
+                return BadRequest($"El curso con ID {createDto.courseId} no existe.");
+            }
+
+            var student = createDto.ToStudentFromCreateDto();
+     
+             {
+                 student.name = createDto.name;
+                 student.email = createDto.email;
+                 student.phone = createDto.phone;
+                 student.courseId = createDto.courseId;
+             }
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetStudent), new { id = student.id }, student.ToDto());
         }
+
         [HttpPut("{id}")]
         public async Task<ActionResult<StudentDto>> UpdateStudent(int id, [FromBody] UpdateStudentRequestDto updateDto)
         {
-           
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -87,17 +101,26 @@ namespace ApiTest.Controller.Student
                 return NotFound();
             }
 
+
+            if (student.email != updateDto.email)
+            {
+                var existingStudentWithNewEmail = await _context.Students.FirstOrDefaultAsync(s => s.email == updateDto.email && s.id != id);
+                if (existingStudentWithNewEmail != null)
+                {
+                    return BadRequest("El nuevo correo electrónico ya está en uso por otro estudiante.");
+                }
+            }
+
             student.name = updateDto.name;
             student.email = updateDto.email;
             student.phone = updateDto.phone;
-
-        
 
             _context.Entry(student).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok(student.ToDto());
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
