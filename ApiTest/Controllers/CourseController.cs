@@ -17,6 +17,7 @@ namespace ApiTest.Controller.Course
     public class CourseController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly string _imagePath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedImages");
 
         public CourseController(ApplicationDBContext context)
         {
@@ -43,23 +44,28 @@ namespace ApiTest.Controller.Course
             return Ok(course.ToDto());
         }
         [HttpPost]
-        public async Task<ActionResult<CourseDto>> CreateCourse([FromBody] CreateCourseRequestDto createDto)
-        {
-            if (!ModelState.IsValid)
-            {
+        public async Task<IActionResult> CreateCourse([FromForm] CreateCourseRequestDto createDto)
+        {   
+            if(createDto.imageUrl == null || createDto.imageUrl.Length == 0){
+                return BadRequest("No file uploades");
+            }
+            
+            if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
 
             var course = createDto.ToCourseFromCreateDto();
+            await _context.Courses.AddAsync(course);
+            await _context.SaveChangesAsync();
 
-             {
-                 course.name = createDto.name;
-                 course.description = createDto.description;
-                 course.imageUrl = createDto.imageUrl;
-                 course.schedule = createDto.schedule;
-                 course.professor = createDto.professor;
-             }
+            var fileName = course.id.ToString() + Path.GetExtension(createDto.imageUrl.FileName);
+            var filePath = Path.Combine(_imagePath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create)){
+                await createDto.imageUrl.CopyToAsync(stream);
+            }
             
+            course.imageUrl = fileName;
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 

@@ -18,10 +18,8 @@ namespace ApiTest.Dtos.Course
         [StringLength(100)]
         public string description { get; set; }
 
-        [Required]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "La imagen no puede consistir únicamente de espacios.")]
-        [StringLength(500)]
-        public string imageUrl { get; set; }
+        
+        public IFormFile? imageUrl { get; set; }
 
         [Required(ErrorMessage = "El Horario del curso es obligatorio.")]
         [RegularExpression(@"^.*\D.*$", ErrorMessage = "El campo {0} no puede contener solo números.")]
