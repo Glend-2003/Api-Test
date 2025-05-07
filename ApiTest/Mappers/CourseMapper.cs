@@ -1,7 +1,7 @@
 using ApiTest.Dtos.Course;
 using ApiTest.Models;
 
-namespace ApiTest.Mappers.CourseMappers
+namespace ApiTest.Mappers
 {
     public static class CourseMapper {
         public static CourseDto ToDto(this Course course) {
