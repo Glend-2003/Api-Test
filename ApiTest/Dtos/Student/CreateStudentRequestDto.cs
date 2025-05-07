@@ -17,7 +17,7 @@ namespace ApiTest.Dtos.Student
         public string email { get; set; }
 
         [Required(ErrorMessage = "El numero del estudiante es obligatorio.")]
-        [RegularExpression(@"^\+?[0-8]{8,15}$", ErrorMessage = "El formato del teléfono no es válido. Ejemplo: +50612345678 o 12345678.")]
+        //[RegularExpression(@"^\+?[0-8]{8,15}$", ErrorMessage = "El formato del teléfono no es válido. Ejemplo: +50612345678 o 12345678.")]
         [StringLength(100)]
         public string phone { get; set; }
 
