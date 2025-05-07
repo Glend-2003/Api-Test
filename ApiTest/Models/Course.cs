@@ -15,11 +15,11 @@ namespace ApiTest.Models
         public string name { get; set; }
         [Required]
         public string description { get; set; }
-        [Required]
+        
         public string? imageUrl { get; set; }
         [Required]
         public string schedule { get; set; }
         [Required]
-        public String professor { get; set; }
+        public string professor { get; set; }
     }
 }

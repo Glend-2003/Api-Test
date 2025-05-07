@@ -14,7 +14,7 @@ namespace ApiTest.Dtos.Course
         [Required]
         [StringLength(200)]
         public string description { get; set; }
-       
+        
         public string imageUrl { get; set; }
         [Required]
         [StringLength(100)]

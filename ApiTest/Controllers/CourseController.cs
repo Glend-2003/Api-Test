@@ -25,16 +25,17 @@ namespace ApiTest.Controller.Course
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourses()
+        public async Task<ActionResult> GetCourses()
         {
             var courses = await _context.Courses.ToListAsync();
+            var coursesDto = courses.Select(courses => courses.ToDto());
             return Ok(courses.Select(n => n.ToDto()).ToList());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CourseDto>> GetCourse(int id)
+        public async Task<ActionResult> GetCourse([FromRoute] int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses.FirstOrDefaultAsync(u => u.id == id);
 
             if (course == null)
             {
@@ -49,10 +50,6 @@ namespace ApiTest.Controller.Course
             if(createDto.imageUrl == null || createDto.imageUrl.Length == 0){
                 return BadRequest("No file uploades");
             }
-            
-            if (!ModelState.IsValid) {
-                return BadRequest(ModelState);
-            }
 
             var course = createDto.ToCourseFromCreateDto();
             await _context.Courses.AddAsync(course);
@@ -66,20 +63,16 @@ namespace ApiTest.Controller.Course
             }
             
             course.imageUrl = fileName;
-            _context.Courses.Add(course);
+            _context.Courses.Update(course);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetCourse), new { id = course.id }, course.ToDto());
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCourse(int id, UpdateCourseRequestDto updateDto)
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateCourse([FromRoute] int id, UpdateCourseRequestDto updateDto)
         {
-             if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses.FirstOrDefaultAsync(course => course.id == id);
             if (course == null)
             {
                 return NotFound();
@@ -87,19 +80,22 @@ namespace ApiTest.Controller.Course
 
             course.name = updateDto.name;
             course.description = updateDto.description;
-            course.imageUrl = updateDto.imageUrl;
             course.schedule = updateDto.schedule;
             course.professor = updateDto.professor;
+
+            await _context.SaveChangesAsync();
 
             _context.Entry(course).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(course.ToDto());
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCourse(int id)
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteCourse([FromRoute] int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses.FirstOrDefaultAsync(course => course.id == id);
             if (course == null)
             {
                 return NotFound();
