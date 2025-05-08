@@ -9,7 +9,7 @@ namespace ApiTest.Mappers
                 id = course.id,
                 name = course.name,
                 description = course.description,
-                imageUrl = course.imageUrl,
+                imageUrl = course.imageUrl, 
                 schedule = course.schedule,
                 professor = course.professor
             };

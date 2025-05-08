@@ -28,22 +28,22 @@ namespace ApiTest.Controller.Course
         public async Task<ActionResult> GetCourses()
         {
             var courses = await _context.Courses.ToListAsync();
-            var coursesDto = courses.Select(courses => courses.ToDto());
-            return Ok(courses.Select(n => n.ToDto()).ToList());
+            var coursesDto = courses.Select(course => course.ToDto()).ToList(); 
+            return Ok(coursesDto);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetCourse([FromRoute] int id)
+    public async Task<ActionResult> GetCourse([FromRoute] int id) // Debería ser Task<ActionResult<CourseDto>>
+    {
+        var course = await _context.Courses.FirstOrDefaultAsync(u => u.id == id);
+
+        if (course == null)
         {
-            var course = await _context.Courses.FirstOrDefaultAsync(u => u.id == id);
-
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(course.ToDto());
+            return NotFound();
         }
+        // Aquí llamas a tu CourseMapper.ToDto()
+        return Ok(course.ToDto());
+    }
         [HttpPost]
         public async Task<IActionResult> CreateCourse([FromForm] CreateCourseRequestDto createDto)
         {   
@@ -112,6 +112,26 @@ namespace ApiTest.Controller.Course
 
             return NoContent();
         }
+
+
+        [HttpGet("name/{id}")] // Define una ruta específica para este método, ej: api/course/name/5
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+         public async Task<ActionResult<string>> GetCourseNameById(int id)
+         {
+             // Busca el curso en la base de datos usando el ID proporcionado de forma asíncrona
+             var course = await _context.Courses.FirstOrDefaultAsync(c => c.id == id);
+
+             if (course == null)
+             {
+   
+                 return NotFound($"No se encontró ningún curso con el ID {id}.");
+             }
+
+
+             return Ok(course.name);
+         }
+
 
     }
 }
