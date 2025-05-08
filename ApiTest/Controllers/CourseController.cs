@@ -114,24 +114,18 @@ namespace ApiTest.Controller.Course
         }
 
 
-        [HttpGet("name/{id}")] // Define una ruta específica para este método, ej: api/course/name/5
+        [HttpGet("name/{id}")] 
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
          public async Task<ActionResult<string>> GetCourseNameById(int id)
          {
-             // Busca el curso en la base de datos usando el ID proporcionado de forma asíncrona
              var course = await _context.Courses.FirstOrDefaultAsync(c => c.id == id);
 
              if (course == null)
              {
-   
                  return NotFound($"No se encontró ningún curso con el ID {id}.");
              }
-
-
              return Ok(course.name);
          }
-
-
     }
 }

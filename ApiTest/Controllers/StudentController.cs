@@ -8,6 +8,8 @@ using ApiTest.Mappers;
 using ApiTest.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ApiTest.Controller.Course;
+using Microsoft.AspNetCore.Http;
 
 namespace ApiTest.Controller.Student
 {
@@ -81,16 +83,26 @@ namespace ApiTest.Controller.Student
                  student.courseId = createDto.courseId;
              }
             _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            var courseName = await GetCourseNameById(createDto.courseId);
             await FirebaseHelper.SendPushNotificationToTopicAsync(
                 topic: "course_notifications",
                 title: "Se agregó un nuevo estudiante",
-                body: $"Estudiante: {student.name}, se ha inscrito al curso: {student.courseId}"
+                body: $"Estudiante: {student.name}, se ha inscrito al curso: {courseName}"
             );
-            await _context.SaveChangesAsync();
-
             
-
             return CreatedAtAction(nameof(GetStudent), new { id = student.id }, student.ToDto());
+        }
+
+        private async Task<string> GetCourseNameById(int courseId)
+        {
+            var course = await _context.Courses
+                .Where(c => c.id == courseId)
+                .Select(c => c.name)
+                .FirstOrDefaultAsync();
+
+            return course ?? "Curso no encontrado";
         }
 
         [HttpPut("{id}")]
