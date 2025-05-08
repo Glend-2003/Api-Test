@@ -81,7 +81,14 @@ namespace ApiTest.Controller.Student
                  student.courseId = createDto.courseId;
              }
             _context.Students.Add(student);
+            await FirebaseHelper.SendPushNotificationToTopicAsync(
+                topic: "course_notifications",
+                title: "Se agregó un nuevo estudiante",
+                body: $"Estudiante: {student.name}, se ha inscrito al curso: {student.courseId}"
+            );
             await _context.SaveChangesAsync();
+
+            
 
             return CreatedAtAction(nameof(GetStudent), new { id = student.id }, student.ToDto());
         }
